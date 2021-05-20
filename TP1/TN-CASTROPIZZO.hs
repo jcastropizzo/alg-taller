@@ -37,8 +37,8 @@ satisfaceGoldbach n
 verificarConjeturaHasta :: Integer -> Bool
 verificarConjeturaHasta n
     | (n `mod` 2) /= 0 = verificarConjeturaHasta (n-1)
-    | n == 2 = True
     | satisfaceGoldbach n = verificarConjeturaHasta (n-2)
+    | n == 2 = True
     | otherwise = False
 
 -- EJ 3
