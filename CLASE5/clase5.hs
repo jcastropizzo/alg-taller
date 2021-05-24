@@ -2,7 +2,7 @@ sumaDivisoresHasta :: Int -> Int -> Int
 sumaDivisoresHasta num hasta
     | hasta < 1 = 0
     | num < 0 = sumaDivisoresHasta (num*(-1)) hasta
-    | otherwise = iterador(num,hasta,1)
+    | otherwise = iterador(num,hasta,2)
     where 
         iterador :: (Int, Int,Int)-> Int
         iterador (num, hasta, currentDiv)
@@ -14,31 +14,21 @@ sumaDivisoresHasta num hasta
 sumaDivisores :: Int -> Int
 sumaDivisores num = sumaDivisoresHasta num num
 
+esPar :: Int -> Bool
+esPar n = ( n `mod` 2) == 0
+
 esPrimo :: Int -> Bool
-esPrimo num
-    | num < 0 = False
-    | num == 0 = True
-    | otherwise = esPrimoIterador (num,num)
-    where
-        esPrimoIterador :: (Int, Int) -> Bool
-        esPrimoIterador (baseNum, currentNum)
-            | currentNum <= 1 = True -- Es primo, llegó al final del loop
-            | baseNum == currentNum = esPrimoIterador (baseNum, currentNum-1)
-            | ((baseNum `mod` currentNum) == 0)
-                && (baseNum /= currentNum) = False
-            | otherwise = esPrimoIterador (baseNum, currentNum-1)
+esPrimo n
+    | n < 2 = False
+    | otherwise = ((menorDivisor n) == n)
 
 menorDivisor :: Int -> Int
-menorDivisor num
-    | num < 0 = menorDivisor (-num)
-    | num == 1 = 1
-    | otherwise = menorDivisorIterador num 2
-    where
-        menorDivisorIterador :: Int -> Int -> Int 
-        menorDivisorIterador num currentPosibleDiv
-            | currentPosibleDiv == num = num
-            | num `mod` currentPosibleDiv == 0 = currentPosibleDiv
-            | otherwise = menorDivisorIterador num (currentPosibleDiv+1)
+menorDivisor n = menorDivisorDesde (2, n)
+
+menorDivisorDesde :: (Int, Int) -> Int
+menorDivisorDesde (k, n)
+    | mod n k == 0 = k
+    | otherwise = menorDivisorDesde ((k + 1), n)
 
 nEsimoPrimo :: Int -> Int
 nEsimoPrimo primeIndex
@@ -125,3 +115,67 @@ esSumaInicialDePrimos targetNumber = iteratorEsSumaInicialDePrimos 0 targetNumbe
             | (sumaPrimosHastaN currentN) == targetNumber = True
             | otherwise = False
 
+tomarValorMax :: Int -> Int -> Int
+tomarValorMax nmin nmax = tomarValorMaxIterator nmin nmax 0
+    where
+        tomarValorMaxIterator :: Int -> Int -> Int -> Int
+        tomarValorMaxIterator nmin nmax maxValue
+            | (nmin - 1) == nmax = maxValue
+            | maxValue < currentValue = tomarValorMaxIterator nmin (nmax-1) currentValue
+            | otherwise = tomarValorMaxIterator nmin (nmax-1) maxValue
+                where currentValue = sumaDivisores nmax
+
+
+tomarValorMin :: Int -> Int -> Int
+tomarValorMin nmin nmax = tomarValorMinIterator nmin (nmax-1) (sumaDivisores nmax)
+    where
+        tomarValorMinIterator :: Int -> Int -> Int -> Int
+        tomarValorMinIterator nmin nmax minValue
+            | (nmin - 1) == nmax = minValue
+            | minValue > currentValue = tomarValorMinIterator nmin (nmax-1) currentValue
+            | otherwise = tomarValorMinIterator nmin (nmax-1) minValue
+                where currentValue = sumaDivisores nmax
+
+-- primos gemelos: a (lowPrime) y b (highPrime), con b = a + 2
+sonPrimosGemelosConLowPrime :: Int -> Bool
+sonPrimosGemelosConLowPrime lowPrime = esPrimo lowPrime && esPrimo (lowPrime + 2)
+
+sonPrimosGemelosConHighPrime :: Int -> Bool
+sonPrimosGemelosConHighPrime highPrime =  esPrimo highPrime && esPrimo (highPrime - 2)
+
+primosGem :: Int -> Int
+primosGem top
+    | top < 4 = 0
+    | sonPrimosGemelosConHighPrime top = 1 + primosGem (top - 1)
+    | otherwise = primosGem (top - 1)
+-- primosGem :: Int -> Int
+-- primosGem top = 0
+
+proxPrimosGem :: Int -> (Int, Int)
+proxPrimosGem possibleLowPrime
+    | sonPrimosGemelosConLowPrime (possibleLowPrime + 1) = (possibleLowPrime+1, possibleLowPrime + 3)
+    | otherwise = proxPrimosGem (possibleLowPrime + 1)
+
+lotharCollantzProxValor :: Int -> Int
+lotharCollantzProxValor an
+    | esPar an = an `div` 2
+    | otherwise = an * 3 + 1
+
+largoSecuencia :: Int -> Int
+largoSecuencia 1 = 0
+largoSecuencia n = 1 + largoSecuencia (lotharCollantzProxValor n)
+
+mayorLargoSecuenciaHastaDiezMil :: Int
+mayorLargoSecuenciaHastaDiezMil = mayorLargoSecuenciaHasta (10000 - 1)
+    
+mayorLargoSecuenciaHasta :: Int -> Int
+mayorLargoSecuenciaHasta n = mayorLargoSecuenciaHastaIterador n 1
+    where 
+        mayorLargoSecuenciaHastaIterador :: Int -> Int -> Int
+        mayorLargoSecuenciaHastaIterador currentTop possibleMaxA1
+            | currentTop <= 0 = possibleMaxA1
+            | largoSecuenciaPossibleMaxA1 < largoSecuenciaCurrentTop = mayorLargoSecuenciaHastaIterador (currentTop - 1) currentTop
+            | otherwise = mayorLargoSecuenciaHastaIterador (currentTop - 1) possibleMaxA1
+            where 
+                largoSecuenciaCurrentTop = largoSecuencia currentTop
+                largoSecuenciaPossibleMaxA1 = largoSecuencia possibleMaxA1

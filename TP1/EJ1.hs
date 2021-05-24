@@ -1,10 +1,7 @@
-first ::(a, b, c) -> a
-first (a, b, c) = a
-second ::(a, b, c) -> b
-second (a, b, c) = b
-third ::(a, b, c) -> c 
-third (a, b, c) = c
-
+menorDivisorDesde :: (Integer, Integer) -> Integer
+menorDivisorDesde (k, n)
+    | mod n k == 0 = k
+    | otherwise = menorDivisorDesde ((k + 1), n)
 
 esPar :: Integer -> Bool
 esPar n = ( n `mod` 2) == 0
